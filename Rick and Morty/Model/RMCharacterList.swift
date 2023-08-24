@@ -9,6 +9,9 @@ import Foundation
 
 struct RMCharacterList: Codable {
     let results: [RMCharacter]
-    let next: URL?
-    let prev: URL?
+    let info: Info
+    
+    struct Info: Codable {
+        let next: URL?
+    }
 }

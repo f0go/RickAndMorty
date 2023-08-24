@@ -18,6 +18,8 @@ protocol HomePresenterProtocol {
     func showError(message: String)
     func didSelectItem(item: RMCharacter)
     func loadCharacters()
+    func loadNextPage()
+    func receiveNewPage(characters: [RMCharacter])
 }
 
 class HomePresenter {
@@ -42,6 +44,14 @@ extension HomePresenter: HomePresenterProtocol {
     
     func didSelectItem(item: RMCharacter) {
         router?.showDetail(character: item)
+    }
+    
+    func loadNextPage() {
+        interactor?.getNextPage()
+    }
+    
+    func receiveNewPage(characters: [RMCharacter]) {
+        view?.loadNextPageCharacters(characters: characters)
     }
     
     func showError(message: String) {

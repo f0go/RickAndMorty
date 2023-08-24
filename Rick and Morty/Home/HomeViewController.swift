@@ -13,6 +13,7 @@ protocol HomeViewProtocol {
     var presenter: HomePresenterProtocol? { get set }
     func refresh(_ sender: Any)
     func updateCharacters(characters: [RMCharacter])
+    func loadNextPageCharacters(characters: [RMCharacter])
 }
 
 class HomeViewController: UITableViewController, HomeViewProtocol, UISearchResultsUpdating, UISearchBarDelegate {
@@ -62,6 +63,15 @@ extension HomeViewController {
         }
     }
     
+    func loadNextPageCharacters(characters: [RMCharacter]) {
+        self.characters.append(contentsOf: characters)
+        filteredCharacters = self.characters
+        DispatchQueue.main.async { [weak self] in
+            self?.refreshControl?.endRefreshing()
+            self?.tableView.reloadData()
+        }
+    }
+    
     func updateSearchResults(for searchController: UISearchController) {
         guard let searchText = searchController.searchBar.text, searchText != "" else {
             filteredCharacters = characters
@@ -74,6 +84,17 @@ extension HomeViewController {
         filteredCharacters = characters.filter {$0.name.lowercased().contains(searchText.lowercased())}
         DispatchQueue.main.async { [weak self] in
             self?.tableView.reloadData()
+        }
+    }
+}
+
+extension HomeViewController {
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        //Prevent load new page while searchig
+        guard !(searchController?.isActive ?? false) else { return }
+        let currentOffset = scrollView.contentOffset.y + scrollView.bounds.height - view.safeAreaInsets.bottom
+        if currentOffset > tableView.contentSize.height {
+            presenter?.loadNextPage()
         }
     }
 }
